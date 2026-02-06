@@ -1,0 +1,46 @@
+{
+  "categories": [
+    {
+      "id": "tech",
+      "label": "Technology",
+      "icon": "💻",
+      "color": "#3b82f6",
+      "subcategories": ["AI/ML", "Startups", "Gadgets", "Programming", "Cybersecurity"]
+    },
+    {
+      "id": "biz",
+      "label": "Business",
+      "icon": "📊",
+      "color": "#10b981",
+      "subcategories": ["Markets", "Economy", "Startups", "Real Estate"]
+    },
+    {
+      "id": "science",
+      "label": "Science",
+      "icon": "🔬",
+      "color": "#8b5cf6",
+      "subcategories": ["Space", "Physics", "Biology", "Environment"]
+    },
+    {
+      "id": "sports",
+      "label": "Sports",
+      "icon": "⚽",
+      "color": "#f59e0b",
+      "subcategories": ["Cricket", "Football", "Tennis", "Basketball"]
+    },
+    {
+      "id": "health",
+      "label": "Health",
+      "icon": "🏥",
+      "color": "#ef4444",
+      "subcategories": ["Medicine", "Fitness", "Mental Health", "Nutrition"]
+    },
+    {
+      "id": "entertainment",
+      "label": "Entertainment",
+      "icon": "🎬",
+      "color": "#ec4899",
+      "subcategories": ["Movies", "Music", "Gaming", "TV Shows"]
+    }
+  ]
+}
