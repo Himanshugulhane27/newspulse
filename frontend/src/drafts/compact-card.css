@@ -1,0 +1,39 @@
+/* compact card styles - experimenting with a denser layout */
+.compact-card {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: var(--card-bg, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.compact-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.compact-card__image {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.compact-card__content {
+  flex: 1;
+  min-width: 0;
+}
+.compact-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #f1f5f9);
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compact-card__meta {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+}
