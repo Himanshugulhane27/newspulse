@@ -1,0 +1,13 @@
+{
+  "trending": [
+    { "topic": "Artificial Intelligence", "category": "technology", "articles": 89, "sentiment": "positive" },
+    { "topic": "Budget 2026", "category": "politics", "articles": 67, "sentiment": "mixed" },
+    { "topic": "IPL Auction", "category": "sports", "articles": 54, "sentiment": "positive" },
+    { "topic": "Climate Change", "category": "science", "articles": 43, "sentiment": "negative" },
+    { "topic": "Startup Funding", "category": "business", "articles": 38, "sentiment": "positive" },
+    { "topic": "Space Mission", "category": "science", "articles": 31, "sentiment": "positive" },
+    { "topic": "Crypto Regulations", "category": "business", "articles": 28, "sentiment": "mixed" },
+    { "topic": "Mental Health", "category": "health", "articles": 25, "sentiment": "positive" }
+  ],
+  "lastUpdated": "2026-02-16T10:00:00Z"
+}
