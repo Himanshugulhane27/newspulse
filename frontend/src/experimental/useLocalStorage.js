@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // custom hook for persisting state in localStorage
-// might be handy for saving user preferences
+// might be handy for saving user preferences like theme, category
 function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
     try {
@@ -21,7 +21,16 @@ function useLocalStorage(key, initialValue) {
     }
   }, [key, storedValue]);
 
-  return [storedValue, setStoredValue];
+  const removeValue = () => {
+    try {
+      window.localStorage.removeItem(key);
+      setStoredValue(initialValue);
+    } catch (error) {
+      console.warn(`Error removing localStorage key "${key}":`, error);
+    }
+  };
+
+  return [storedValue, setStoredValue, removeValue];
 }
 
 export default useLocalStorage;
