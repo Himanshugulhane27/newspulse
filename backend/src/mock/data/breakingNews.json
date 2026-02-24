@@ -1,0 +1,31 @@
+{
+  "breaking": [
+    {
+      "id": "bn001",
+      "title": "Major earthquake hits Pacific region",
+      "priority": "high",
+      "category": "general",
+      "source": "Reuters",
+      "timestamp": "2026-02-24T06:30:00Z",
+      "summary": "A 7.2 magnitude earthquake was recorded in the Pacific Ring of Fire region."
+    },
+    {
+      "id": "bn002",
+      "title": "Tech giant announces surprise acquisition",
+      "priority": "medium",
+      "category": "technology",
+      "source": "TechCrunch",
+      "timestamp": "2026-02-24T08:15:00Z",
+      "summary": "In a surprise move, a major technology company has announced the acquisition of a popular startup."
+    },
+    {
+      "id": "bn003",
+      "title": "Central bank adjusts interest rates",
+      "priority": "high",
+      "category": "business",
+      "source": "Bloomberg",
+      "timestamp": "2026-02-24T09:00:00Z",
+      "summary": "The central bank has announced a change in interest rates affecting markets globally."
+    }
+  ]
+}
