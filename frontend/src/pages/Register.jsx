@@ -29,7 +29,8 @@ const Register = () => {
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
-      await registerUser(data)
+      const { username, email, password } = data
+      await registerUser({ username, email, password })
       toast.success('Account created successfully!')
       navigate('/', { replace: true })
     } catch (error) {
