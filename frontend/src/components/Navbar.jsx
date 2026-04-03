@@ -1,23 +1,35 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, Menu, X, Sun, Moon, User, LogOut, Bookmark } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const { user, isAuthenticated, logout } = useAuth()
   const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
+
+  // Sync input with URL query param on navigation (back/forward/refresh)
+  useEffect(() => {
+    const urlQuery = searchParams.get('search') || ''
+    setSearchQuery(urlQuery)
+  }, [searchParams])
 
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery('')
       setIsMenuOpen(false)
     }
+  }
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    navigate('/')
+    setIsMenuOpen(false)
   }
 
   const handleLogout = () => {
@@ -48,8 +60,18 @@ const Navbar = () => {
                 placeholder="Search news..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pr-10"
+                className={`input-field ${searchQuery ? 'pr-20' : 'pr-10'}`}
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-9 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
               <button
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -129,8 +151,18 @@ const Navbar = () => {
                   placeholder="Search news..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input-field pr-10"
+                  className={`input-field ${searchQuery ? 'pr-20' : 'pr-10'}`}
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-9 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   type="submit"
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
