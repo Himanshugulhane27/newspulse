@@ -6,11 +6,12 @@ const getNews = async (req, res) => {
   try {
     const { 
       category = 'general', 
-      page = 1, 
-      pageSize = 20, 
       sortBy = 'publishedAt',
       country = 'us'
     } = req.query;
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize) || 20));
 
     const response = await axios.get(`${NEWS_API_BASE_URL}/top-headlines`, {
       params: {
@@ -42,13 +43,14 @@ const searchNews = async (req, res) => {
   try {
     const { 
       q, 
-      page = 1, 
-      pageSize = 20, 
       sortBy = 'publishedAt',
       from,
       to,
       language = 'en'
     } = req.query;
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize) || 20));
 
     if (!q) {
       return res.status(400).json({ message: 'Search query is required' });
