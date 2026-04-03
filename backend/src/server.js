@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+const passport = require('./config/passport');
 
 const authRoutes = require('./routes/auth');
 const newsRoutes = require('./routes/news');
@@ -47,6 +48,9 @@ app.use('/api/', limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Passport initialization
+app.use(passport.initialize());
 
 // Routes
 app.use('/api/auth', authRoutes);
