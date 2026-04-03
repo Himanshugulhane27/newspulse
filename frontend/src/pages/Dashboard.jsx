@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Bookmark, Trash2, ExternalLink, Filter } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useBookmarks, useDeleteBookmark } from '../hooks/useApi'
@@ -27,19 +28,18 @@ const Dashboard = () => {
   }
 
   const categories = [
-    { id: 'all', name: 'All Categories', icon: '📰' },
-    { id: 'technology', name: 'Technology', icon: '💻' },
-    { id: 'business', name: 'Business', icon: '💼' },
-    { id: 'sports', name: 'Sports', icon: '⚽' },
-    { id: 'health', name: 'Health', icon: '🏥' },
-    { id: 'entertainment', name: 'Entertainment', icon: '🎬' }
+    { id: 'all', name: 'All Categories' },
+    { id: 'technology', name: 'Technology' },
+    { id: 'business', name: 'Business' },
+    { id: 'sports', name: 'Sports' },
+    { id: 'health', name: 'Health' },
+    { id: 'entertainment', name: 'Entertainment' }
   ]
 
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Failed to load bookmarks
           </h2>
@@ -107,7 +107,7 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                This Month
+                This Page
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {bookmarks.filter(b => {
@@ -129,14 +129,13 @@ const Dashboard = () => {
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 selectedCategory === category.id
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
-              <span>{category.icon}</span>
-              <span>{category.name}</span>
+              {category.name}
             </button>
           ))}
         </div>
@@ -160,7 +159,7 @@ const Dashboard = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
-                    <span className="text-4xl">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
                       {getCategoryIcon(bookmark.article.category)}
                     </span>
                   </div>
@@ -211,7 +210,7 @@ const Dashboard = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+          <div className="text-center py-12">
           <Bookmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             No bookmarks yet
@@ -219,13 +218,13 @@ const Dashboard = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             Start bookmarking articles to see them here
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="btn-primary inline-flex items-center space-x-2"
           >
             <span>Browse News</span>
             <ExternalLink className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       )}
     </div>
