@@ -8,7 +8,7 @@ const NewsCard = ({ article }) => {
   const { isAuthenticated } = useAuth()
   const [imageError, setImageError] = useState(false)
   
-  const { data: bookmarkData } = useCheckBookmark(article.url)
+  const { data: bookmarkData } = useCheckBookmark(isAuthenticated ? article.url : null)
   const createBookmark = useCreateBookmark()
   const deleteBookmark = useDeleteBookmark()
   
@@ -43,7 +43,7 @@ const NewsCard = ({ article }) => {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
-            <span className="text-4xl">📰</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">No Image</span>
           </div>
         )}
         
