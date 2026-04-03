@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect, useCallback } from 'react'
 import { authService } from '../services/api'
 
 const AuthContext = createContext()
@@ -78,6 +78,22 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const loginWithToken = useCallback(async (token) => {
+    try {
+      localStorage.setItem('token', token)
+      authService.setAuthToken(token)
+      
+      const response = await authService.getProfile()
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: response.data.user, token } })
+      return response.data
+    } catch (error) {
+      localStorage.removeItem('token')
+      authService.setAuthToken(null)
+      dispatch({ type: 'LOGOUT' })
+      throw error
+    }
+  }, [])
+
   const register = async (userData) => {
     try {
       const response = await authService.register(userData)
@@ -102,6 +118,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     ...state,
     login,
+    loginWithToken,
     register,
     logout
   }
