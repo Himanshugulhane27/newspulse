@@ -105,4 +105,16 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getProfile };
+const googleCallback = (req, res) => {
+  try {
+    const token = generateToken(req.user._id);
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/auth/callback?token=${token}`);
+  } catch (error) {
+    console.error('Google callback error:', error);
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendURL}/login?error=oauth_failed`);
+  }
+};
+
+module.exports = { register, login, getProfile, googleCallback, generateToken };
