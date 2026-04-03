@@ -21,11 +21,10 @@ const Home = () => {
   })
 
   // Use search or regular news based on query
-  const newsQuery = searchQuery 
-    ? useSearchNews({ q: searchQuery, page, pageSize: 12 })
-    : useNews({ category, page, pageSize: 12 })
+  const searchResult = useSearchNews({ q: searchQuery, page, pageSize: 12 })
+  const newsResult = useNews({ category, page, pageSize: 12, enabled: !searchQuery })
 
-  const { data, isLoading, error, isFetching, refetch } = newsQuery
+  const { data, isLoading, error, isFetching, refetch } = searchQuery ? searchResult : newsResult
 
   // Reset when category or search changes
   useEffect(() => {
@@ -142,7 +141,6 @@ const Home = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">📰</div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 No articles found
               </h3>
