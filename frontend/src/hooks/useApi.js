@@ -3,11 +3,12 @@ import { newsService, bookmarkService } from '../services/api'
 import toast from 'react-hot-toast'
 
 // News hooks
-export const useNews = (params) => {
+export const useNews = ({ enabled = true, ...params }) => {
   return useQuery(
     ['news', params],
     () => newsService.getNews(params),
     {
+      enabled,
       keepPreviousData: true,
       staleTime: 2 * 60 * 1000, // 2 minutes
     }
@@ -21,6 +22,7 @@ export const useSearchNews = (params) => {
     {
       enabled: !!params.q,
       keepPreviousData: true,
+      staleTime: 2 * 60 * 1000, // 2 minutes
     }
   )
 }
