@@ -37,15 +37,15 @@ export const capitalizeFirst = (str) => {
 
 export const getCategoryIcon = (category) => {
   const icons = {
-    general: '📰',
-    technology: '💻',
-    business: '💼',
-    sports: '⚽',
-    health: '🏥',
-    entertainment: '🎬',
-    science: '🔬'
+    general: 'General',
+    technology: 'Tech',
+    business: 'Business',
+    sports: 'Sports',
+    health: 'Health',
+    entertainment: 'Entertainment',
+    science: 'Science'
   }
-  return icons[category] || '📰'
+  return icons[category] || 'News'
 }
 
 export const debounce = (func, wait) => {
