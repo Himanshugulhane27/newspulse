@@ -30,7 +30,7 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, etc.)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+    if (allowedOrigins.includes(origin) || origin.includes('vercel.app') || origin.includes('onrender.com')) {
       return callback(null, true);
     }
     
