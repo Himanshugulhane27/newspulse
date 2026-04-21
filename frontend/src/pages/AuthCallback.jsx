@@ -24,7 +24,7 @@ const AuthCallback = () => {
       loginWithToken(token)
         .then(() => {
           toast.success('Login successful!')
-          navigate('/', { replace: true })
+          navigate('/home', { replace: true })
         })
         .catch((err) => {
           console.error('Token login error:', err)
@@ -41,23 +41,23 @@ const AuthCallback = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-red-600 dark:text-red-400 text-2xl">✕</span>
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span className="text-red-500 text-2xl font-bold">X</span>
           </div>
-          <p className="text-red-600 dark:text-red-400 text-lg">{error}</p>
-          <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Redirecting to login...</p>
+          <p className="text-red-500 text-lg font-semibold">{error}</p>
+          <p className="text-gray-400 dark:text-gray-500 mt-2 text-sm">Redirecting to login...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-400 text-lg">Completing sign in...</p>
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+        <p className="text-gray-500 dark:text-gray-400 text-base font-medium">Completing sign in...</p>
       </div>
     </div>
   )

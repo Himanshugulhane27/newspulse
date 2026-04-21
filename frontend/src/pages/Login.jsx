@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate()
   const location = useLocation()
   
-  const from = location.state?.from?.pathname || '/'
+  const from = location.state?.from?.pathname || '/home'
 
   const {
     register,
@@ -22,8 +22,7 @@ const Login = () => {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    navigate(from, { replace: true })
-    return null
+    return <Navigate to={from} replace />
   }
 
   const onSubmit = async (data) => {
@@ -40,30 +39,31 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">N</span>
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        <div className="auth-card">
+          {/* Logo & Title */}
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/20">
+              <span className="text-white font-bold text-2xl">N</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+              Welcome
+            </h2>
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+              Sign in to your NewsPulse account
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back
-          </h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Sign in to your NewsPulse account
-          </p>
-        </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Email address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   {...register('email', {
@@ -79,7 +79,7 @@ const Login = () => {
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 font-medium">
                   {errors.email.message}
                 </p>
               )}
@@ -87,12 +87,12 @@ const Login = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   {...register('password', {
@@ -104,62 +104,64 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 font-medium">
                   {errors.password.message}
                 </p>
               )}
             </div>
-          </div>
 
-          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary !py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
                   Signing in...
                 </div>
               ) : (
                 'Sign in'
               )}
             </button>
-          </div>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-white/[0.06]"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-white dark:bg-transparent text-gray-400 dark:text-gray-500 font-medium">
+                  Or continue with
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
 
-          {/* Google OAuth Button */}
-          <div>
+            {/* Google OAuth Button */}
             <button
               type="button"
               onClick={() => {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
                 window.location.href = `${apiUrl}/auth/google`;
               }}
-              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 font-medium"
+              className="w-full flex items-center justify-center gap-3 px-4 py-2.5 
+                border border-gray-200 dark:border-white/[0.08] rounded-xl 
+                bg-white dark:bg-white/[0.03] 
+                text-gray-700 dark:text-gray-300 
+                hover:bg-gray-50 dark:hover:bg-white/[0.06] 
+                transition-all duration-200 font-medium text-sm
+                shadow-sm hover:shadow"
               id="google-login-btn"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -182,20 +184,20 @@ const Login = () => {
               </svg>
               Continue with Google
             </button>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500"
-              >
-                Sign up here
-              </Link>
-            </p>
-          </div>
-        </form>
+            <div className="text-center pt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Don't have an account?{' '}
+                <Link
+                  to="/register"
+                  className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+                >
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )
