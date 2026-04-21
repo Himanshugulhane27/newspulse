@@ -76,13 +76,15 @@ const Home = () => {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-container !py-16">
         <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+            <AlertCircle className="w-7 h-7 text-red-500" />
+          </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Failed to load news
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
             {error.response?.data?.message || 'Something went wrong. Please try again.'}
           </p>
           <button
@@ -98,29 +100,33 @@ const Home = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-container">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {searchQuery ? `Search Results for "${searchQuery}"` : 'Latest News'}
+      <div className="mb-10">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+          {searchQuery ? (
+            <>Search Results for <span className="text-blue-500">"{searchQuery}"</span></>
+          ) : (
+            'Latest News'
+          )}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-500 dark:text-gray-400 text-base">
           Stay updated with the latest news from around the world
         </p>
         
         {searchQuery && (
           <button
             onClick={clearSearch}
-            className="mt-2 text-primary-600 dark:text-primary-400 hover:underline"
+            className="mt-3 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
           >
-            ← Back to all news
+            Back to all news
           </button>
         )}
       </div>
 
       {/* Category Filter - Only show when not searching */}
       {!searchQuery && (
-        <div className="mb-8">
+        <div className="mb-10">
           <CategoryFilter 
             selectedCategory={category}
             onCategoryChange={handleCategoryChange}
@@ -134,17 +140,20 @@ const Home = () => {
       ) : (
         <>
           {allArticles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="news-grid">
               {allArticles.map((article, index) => (
-                <NewsCard key={`${article.url}-${index}`} article={article} />
+                <NewsCard key={`${article.url}-${index}`} article={article} index={index} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <div className="text-center py-20">
+              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-white/[0.04] flex items-center justify-center">
+                <span className="text-2xl font-bold text-gray-400 dark:text-gray-600">?</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 No articles found
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-500 dark:text-gray-400">
                 {searchQuery 
                   ? 'Try searching with different keywords'
                   : 'No articles available in this category right now'
@@ -155,8 +164,11 @@ const Home = () => {
 
           {/* Loading more indicator */}
           {isFetching && page > 1 && (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <div className="flex justify-center py-10">
+              <div className="flex items-center space-x-3 px-5 py-2.5 rounded-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] shadow-sm">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Loading more...</span>
+              </div>
             </div>
           )}
 
