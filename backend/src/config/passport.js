@@ -65,9 +65,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       }
     )
   );
-  console.log('✅ Google OAuth strategy configured');
+  console.log('Google OAuth strategy configured');
 } else {
-  console.warn('⚠️  Google OAuth credentials not found. Google login will be unavailable.');
+  console.warn('Google OAuth credentials not found. Google login will be unavailable.');
 }
 
 module.exports = passport;
