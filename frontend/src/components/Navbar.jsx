@@ -21,14 +21,14 @@ const Navbar = () => {
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`)
+      navigate(`/home?search=${encodeURIComponent(searchQuery.trim())}`)
       setIsMenuOpen(false)
     }
   }
 
   const handleClearSearch = () => {
     setSearchQuery('')
-    navigate('/')
+    navigate('/home')
     setIsMenuOpen(false)
   }
 
@@ -39,15 +39,15 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="glass-nav sticky top-0 z-50">
+      <div className="w-full px-6 sm:px-8 lg:px-12">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center space-x-2.5 group">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:shadow-lg group-hover:shadow-blue-500/30 transition-all duration-250">
               <span className="text-white font-bold text-lg">N</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               NewsPulse
             </span>
           </Link>
@@ -55,75 +55,86 @@ const Navbar = () => {
           {/* Desktop Search */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <Search className="w-4 h-4 text-gray-400" />
+              </div>
               <input
                 type="text"
                 placeholder="Search news..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`input-field ${searchQuery ? 'pr-20' : 'pr-10'}`}
+                className={`search-bar pl-11 ${searchQuery ? 'pr-20' : 'pr-4'}`}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-9 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 transition-all duration-200"
                   aria-label="Clear search"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
               </button>
             </div>
           </form>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all duration-200 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              aria-label="Toggle theme"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
             </button>
 
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <Link
+                  to="/home"
+                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200"
+                >
+                  <span>News</span>
+                </Link>
                 <Link
                   to="/dashboard"
-                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all duration-200"
                 >
-                  <Bookmark className="w-5 h-5" />
                   <span>Dashboard</span>
                 </Link>
-                <div className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center space-x-1.5 px-3 py-2 text-sm">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                    <span className="text-white text-xs font-semibold">{user?.username?.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {user?.username}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-red-600"
+                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 ml-2">
                 <Link
                   to="/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all duration-200"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="btn-primary"
+                  className="btn-primary text-sm !py-2 !px-4"
                 >
                   Register
                 </Link>
@@ -134,75 +145,86 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors text-gray-600 dark:text-gray-400"
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="md:hidden py-4 border-t border-gray-200/60 dark:border-white/[0.06] animate-fade-in">
             {/* Mobile Search */}
             <form onSubmit={handleSearch} className="mb-4">
               <div className="relative">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <Search className="w-4 h-4 text-gray-400" />
+                </div>
                 <input
                   type="text"
                   placeholder="Search news..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`input-field ${searchQuery ? 'pr-20' : 'pr-10'}`}
+                  className={`search-bar pl-11 ${searchQuery ? 'pr-20' : 'pr-4'}`}
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="absolute right-9 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     aria-label="Clear search"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full text-gray-400 hover:text-blue-500 transition-colors"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4" />
                 </button>
               </div>
             </form>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <button
                 onClick={toggleTheme}
-                className="flex items-center space-x-2 w-full p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                className="flex items-center space-x-3 w-full px-3 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl text-gray-700 dark:text-gray-300 transition-colors"
               >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+                <span className="text-sm font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
               </button>
 
               {isAuthenticated ? (
                 <>
                   <Link
+                    to="/home"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl text-gray-700 dark:text-gray-300 transition-colors"
+                  >
+                    <span className="text-sm font-medium">News</span>
+                  </Link>
+                  <Link
                     to="/dashboard"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center space-x-2 w-full p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl text-gray-700 dark:text-gray-300 transition-colors"
                   >
-                    <Bookmark className="w-5 h-5" />
-                    <span>Dashboard</span>
+                    <span className="text-sm font-medium">Dashboard</span>
                   </Link>
-                  <div className="flex items-center space-x-2 p-2">
-                    <User className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <div className="flex items-center space-x-3 px-3 py-2.5">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                      <span className="text-white text-xs font-semibold">{user?.username?.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {user?.username}
                     </span>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-2 w-full p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-600"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-left hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl text-red-500 transition-colors"
                   >
-                    <LogOut className="w-5 h-5" />
-                    <span>Logout</span>
+                    <LogOut className="w-[18px] h-[18px]" />
+                    <span className="text-sm font-medium">Logout</span>
                   </button>
                 </>
               ) : (
@@ -210,14 +232,14 @@ const Navbar = () => {
                   <Link
                     to="/login"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block w-full p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="block w-full px-3 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block w-full p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="block w-full px-3 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors"
                   >
                     Register
                   </Link>
