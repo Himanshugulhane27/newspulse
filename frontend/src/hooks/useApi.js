@@ -10,7 +10,10 @@ export const useNews = ({ enabled = true, ...params }) => {
     {
       enabled,
       keepPreviousData: true,
-      staleTime: 2 * 60 * 1000, // 2 minutes
+      staleTime: 10 * 60 * 1000, // 10 minutes – reduce API calls
+      cacheTime: 30 * 60 * 1000, // 30 minutes
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
     }
   )
 }
@@ -22,14 +25,18 @@ export const useSearchNews = (params) => {
     {
       enabled: !!params.q,
       keepPreviousData: true,
-      staleTime: 2 * 60 * 1000, // 2 minutes
+      staleTime: 10 * 60 * 1000,
+      cacheTime: 30 * 60 * 1000,
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
     }
   )
 }
 
 export const useCategories = () => {
   return useQuery('categories', newsService.getCategories, {
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 60 * 60 * 1000, // 1 hour – categories never change
+    cacheTime: 60 * 60 * 1000,
   })
 }
 
