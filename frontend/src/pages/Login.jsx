@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation, Navigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -11,8 +11,21 @@ const Login = () => {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   
   const from = location.state?.from?.pathname || '/home'
+
+  // Handle OAuth error redirects
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error) {
+      if (error === 'oauth_not_configured') {
+        toast.error('Google login is not available at this time.')
+      } else if (error === 'oauth_failed') {
+        toast.error('Google login failed. Please try again or use email login.')
+      }
+    }
+  }, [searchParams])
 
   const {
     register,
