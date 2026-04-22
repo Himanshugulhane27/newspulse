@@ -37,19 +37,41 @@ router.post('/login', [
 router.get('/profile', auth, getProfile);
 
 // Google OAuth routes
-router.get('/google',
+router.get('/google', (req, res, next) => {
+  const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+  
+  // Check if Google strategy is configured
+  if (!passport._strategy('google')) {
+    console.error('Google OAuth strategy not configured');
+    return res.redirect(`${frontendURL}/login?error=oauth_not_configured`);
+  }
+  
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     session: false,
-  })
-);
+  })(req, res, (err) => {
+    if (err) {
+      console.error('Google OAuth init error:', err);
+      return res.redirect(`${frontendURL}/login?error=oauth_failed`);
+    }
+  });
+});
 
-router.get('/google/callback',
-  passport.authenticate('google', {
-    session: false,
-    failureRedirect: (process.env.FRONTEND_URL || 'http://localhost:5173') + '/login?error=oauth_failed',
-  }),
-  googleCallback
-);
+router.get('/google/callback', (req, res, next) => {
+  const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+  
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    if (err) {
+      console.error('Google OAuth callback error:', err);
+      return res.redirect(`${frontendURL}/login?error=oauth_failed`);
+    }
+    if (!user) {
+      console.error('Google OAuth callback: no user returned', info);
+      return res.redirect(`${frontendURL}/login?error=oauth_failed`);
+    }
+    req.user = user;
+    googleCallback(req, res);
+  })(req, res, next);
+});
 
 module.exports = router;
