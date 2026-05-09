@@ -1,0 +1,8 @@
+.feed-grid-a { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feed-grid-b { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: auto auto; gap: 16px; }
+.feed-grid-b .featured { grid-row: 1 / 3; }
+.feed-grid-c { columns: 3; column-gap: 16px; }
+.feed-grid-c .card { break-inside: avoid; margin-bottom: 16px; }
+.feed-grid-d { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 16px; }
+.feed-grid-d .card { flex: 0 0 280px; scroll-snap-align: start; }
+@media (max-width: 768px) { .feed-grid-a, .feed-grid-b, .feed-grid-c { display: flex; flex-direction: column; gap: 12px; } }
