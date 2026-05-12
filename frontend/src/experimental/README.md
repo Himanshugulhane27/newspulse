@@ -1,26 +1,16 @@
 # Experimental Components
 
-This folder contains experimental UI components that are being tested.
-These are NOT used in the production app.
+This folder contains experimental UI components being tested.
+NOT used in the production app.
+
+## Hooks
+- `useWindowSize.js` — Window dimensions with breakpoint helpers
+- `useNewsPolling.js` — Polling fallback for websocket
+- `useMediaQuery.js` — CSS media query hook
+- `useThrottle.js` — Throttle hook for scroll events
 
 ## Components
-- `AltCardLayout.jsx` - Horizontal card layout variant
-- `CompactTile.jsx` - Compact news tile for mobile
-- `ScrollFeed.jsx` - Infinite scroll feed experiment
-- `SearchOverlay.jsx` - Full-screen search overlay
-- `useDebounce.js` - Debounce hook for search
-- `useLocalStorage.js` - LocalStorage persistence hook
-- `useFetch.js` - Generic fetch hook
-- `useOnlineStatus.js` - Online/offline detection
-- `useKeyboardShortcut.js` - Keyboard shortcut handler
-- `useScrollPosition.js` - Scroll tracking hook
-- `InfiniteScroll.jsx` - Reusable infinite scroll wrapper
-- `TagFilter.jsx` - Tag-based filtering
-- `Tabs.jsx` - Reusable tab component
-- `LazyImage.jsx` - Lazy loading images
-- `ErrorBoundary.jsx` - Error boundary component
-- `FocusMode.jsx` - Distraction-free reading mode
+- `CardHoverEffect.jsx` — Hover lift + glow card wrapper
+- `GlassCard.jsx` — Glassmorphism card style
 
-## Status
-Most of these are rough prototypes. Some may be integrated
-into the main app after more testing and refinement.
+Most are rough prototypes for potential future integration.
