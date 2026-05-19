@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
+const { logger } = require('../utils/logger');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -17,12 +18,12 @@ const register = async (req, res) => {
 
     // Check if user exists
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
+      $or: [{ email }, { username }],
+    }).lean();
 
     if (existingUser) {
-      return res.status(400).json({ 
-        message: 'User already exists with this email or username' 
+      return res.status(400).json({
+        message: 'User already exists with this email or username',
       });
     }
 
@@ -33,6 +34,8 @@ const register = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    logger.info(`User registered: ${user.email}`);
+
     res.status(201).json({
       message: 'User created successfully',
       token,
@@ -40,11 +43,11 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        preferences: user.preferences
-      }
+        preferences: user.preferences,
+      },
     });
   } catch (error) {
-    console.error('Register error:', error);
+    logger.error('Register error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -58,7 +61,7 @@ const login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Find user
+    // Find user — need full document here (not .lean()) for comparePassword()
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -73,6 +76,8 @@ const login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    logger.info(`User logged in: ${user.email}`);
+
     res.json({
       message: 'Login successful',
       token,
@@ -80,11 +85,11 @@ const login = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        preferences: user.preferences
-      }
+        preferences: user.preferences,
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -96,11 +101,11 @@ const getProfile = async (req, res) => {
         id: req.user._id,
         username: req.user.username,
         email: req.user.email,
-        preferences: req.user.preferences
-      }
+        preferences: req.user.preferences,
+      },
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.error('Get profile error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -111,7 +116,7 @@ const googleCallback = (req, res) => {
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.redirect(`${frontendURL}/auth/callback?token=${token}`);
   } catch (error) {
-    console.error('Google callback error:', error);
+    logger.error('Google callback error:', error.message);
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
     res.redirect(`${frontendURL}/login?error=oauth_failed`);
   }
