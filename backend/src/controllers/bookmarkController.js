@@ -1,18 +1,21 @@
+const { validationResult } = require('express-validator');
 const Bookmark = require('../models/Bookmark');
+const { logger } = require('../utils/logger');
 
 const createBookmark = async (req, res) => {
   try {
-    const { article } = req.body;
-    
-    if (!article || !article.title || !article.url) {
-      return res.status(400).json({ message: 'Article title and URL are required' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const { article } = req.body;
 
     // Check if bookmark already exists
     const existingBookmark = await Bookmark.findOne({
       userId: req.user._id,
-      'article.url': article.url
-    });
+      'article.url': article.url,
+    }).lean();
 
     if (existingBookmark) {
       return res.status(400).json({ message: 'Article already bookmarked' });
@@ -28,35 +31,42 @@ const createBookmark = async (req, res) => {
         publishedAt: article.publishedAt,
         source: article.source,
         category: article.category,
-        content: article.content
-      }
+        content: article.content,
+      },
     });
 
     await bookmark.save();
 
     res.status(201).json({
       message: 'Article bookmarked successfully',
-      bookmark
+      bookmark,
     });
   } catch (error) {
-    console.error('Create bookmark error:', error);
+    logger.error('Create bookmark error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 const getBookmarks = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { page = 1, pageSize = 20, category } = req.query;
-    
+
     const query = { userId: req.user._id };
     if (category && category !== 'all') {
       query['article.category'] = category;
     }
 
+    // .lean() returns plain JS objects — ~5x faster for read-only responses
     const bookmarks = await Bookmark.find(query)
       .sort({ createdAt: -1 })
       .limit(pageSize * 1)
-      .skip((page - 1) * pageSize);
+      .skip((page - 1) * pageSize)
+      .lean();
 
     const total = await Bookmark.countDocuments(query);
 
@@ -64,10 +74,10 @@ const getBookmarks = async (req, res) => {
       bookmarks,
       totalResults: total,
       page: parseInt(page),
-      pageSize: parseInt(pageSize)
+      pageSize: parseInt(pageSize),
     });
   } catch (error) {
-    console.error('Get bookmarks error:', error);
+    logger.error('Get bookmarks error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -78,7 +88,7 @@ const deleteBookmark = async (req, res) => {
 
     const bookmark = await Bookmark.findOneAndDelete({
       _id: id,
-      userId: req.user._id
+      userId: req.user._id,
     });
 
     if (!bookmark) {
@@ -87,27 +97,29 @@ const deleteBookmark = async (req, res) => {
 
     res.json({ message: 'Bookmark removed successfully' });
   } catch (error) {
-    console.error('Delete bookmark error:', error);
+    logger.error('Delete bookmark error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 const checkBookmark = async (req, res) => {
   try {
-    const { url } = req.query;
-    
-    if (!url) {
-      return res.status(400).json({ message: 'URL is required' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
+    const { url } = req.query;
+
+    // .lean() for read-only check
     const bookmark = await Bookmark.findOne({
       userId: req.user._id,
-      'article.url': url
-    });
+      'article.url': url,
+    }).lean();
 
     res.json({ isBookmarked: !!bookmark, bookmarkId: bookmark?._id });
   } catch (error) {
-    console.error('Check bookmark error:', error);
+    logger.error('Check bookmark error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
