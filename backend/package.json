@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest"
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:verbose": "jest --detectOpenHandles --forceExit --verbose",
+    "test:coverage": "jest --detectOpenHandles --forceExit --coverage"
   },
   "dependencies": {
     "axios": "^1.6.2",
@@ -19,12 +21,15 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
+    "morgan": "^1.10.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.0.2"
+    "mongodb-memory-server": "^11.1.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.2.2"
   },
   "keywords": [
     "news",
