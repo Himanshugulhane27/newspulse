@@ -24,8 +24,8 @@ services:
       NODE_ENV: production
       PORT: 5000
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/newspulse?authSource=admin
-      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
-      NEWS_API_KEY: your-newsapi-key-from-newsapi.org
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production}
+      NEWS_API_KEY: ${NEWS_API_KEY:-your-newsapi-key}
       CORS_ORIGIN: http://localhost:3000
     ports:
       - "5000:5000"
