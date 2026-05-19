@@ -1,12 +1,17 @@
 const axios = require('axios');
 const { getSampleArticles, searchSampleArticles } = require('../data/sampleNews');
+const { logger } = require('../utils/logger');
 
 const NEWS_API_BASE_URL = 'https://newsapi.org/v2';
 
-// ── In-memory cache ────────────────────────────────────────────────────
-// Stores { data, timestamp } keyed by a stringified params object.
-// TTL = 30 minutes – keeps responses alive long enough to survive rate limits.
+// ── LRU Cache ──────────────────────────────────────────────────────────
+// In-memory cache with a maximum size limit and LRU eviction.
+// Map preserves insertion order — on read we delete-and-reinsert to
+// promote the entry to "most recently used". On write, if the map
+// exceeds MAX_CACHE_SIZE we evict the oldest (least recently used) key.
+
 const newsCache = new Map();
+const MAX_CACHE_SIZE = 100;
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
 const getCacheKey = (prefix, params) => {
@@ -16,25 +21,40 @@ const getCacheKey = (prefix, params) => {
 const getFromCache = (key) => {
   const cached = newsCache.get(key);
   if (!cached) return null;
-  // Return cached data even if stale (fallback for rate limits)
+
+  // Promote to most-recently-used (move to end of Map)
+  newsCache.delete(key);
+  newsCache.set(key, cached);
   return cached;
 };
 
 const setCache = (key, data) => {
+  // If key already exists, delete it first (will be re-inserted at end)
+  if (newsCache.has(key)) {
+    newsCache.delete(key);
+  }
+
+  // Evict least-recently-used entries if at capacity
+  while (newsCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = newsCache.keys().next().value;
+    newsCache.delete(oldestKey);
+    logger.debug('Cache evicted:', oldestKey);
+  }
+
   newsCache.set(key, { data, timestamp: Date.now() });
 };
 
 const isCacheFresh = (cached) => {
-  return cached && (Date.now() - cached.timestamp) < CACHE_TTL;
+  return cached && Date.now() - cached.timestamp < CACHE_TTL;
 };
 
 // ── getNews ────────────────────────────────────────────────────────────
 const getNews = async (req, res) => {
   try {
-    const { 
-      category = 'general', 
+    const {
+      category = 'general',
       sortBy = 'publishedAt',
-      country = 'us'
+      country = 'us',
     } = req.query;
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -46,6 +66,7 @@ const getNews = async (req, res) => {
 
     // If cache is fresh, serve it directly (saves API calls)
     if (isCacheFresh(cached)) {
+      logger.debug('Cache HIT (fresh):', cacheKey);
       return res.json(cached.data);
     }
 
@@ -58,35 +79,33 @@ const getNews = async (req, res) => {
           pageSize,
           sortBy,
           country,
-          apiKey: process.env.NEWS_API_KEY
-        }
+          apiKey: process.env.NEWS_API_KEY,
+        },
       });
 
       const responseData = {
         articles: response.data.articles,
         totalResults: response.data.totalResults,
         page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        pageSize: parseInt(pageSize),
       };
 
-      // Cache the successful response
       setCache(cacheKey, responseData);
-
       res.json(responseData);
     } catch (apiError) {
       // If API fails but we have stale cache, serve it as fallback
       if (cached) {
-        console.log('NewsAPI error – serving stale cache for:', cacheKey);
+        logger.warn('NewsAPI error — serving stale cache for:', cacheKey);
         return res.json(cached.data);
       }
 
       // No cache – serve sample data as last resort fallback
-      console.log('NewsAPI unavailable – serving sample data for category:', category);
+      logger.warn('NewsAPI unavailable — serving sample data for category:', category);
       const sampleData = getSampleArticles(category, page, pageSize);
       res.json(sampleData);
     }
   } catch (error) {
-    console.error('News API error:', error.response?.data || error.message);
+    logger.error('News API error:', error.message);
     // Even on unexpected errors, serve sample data instead of a 500
     const category = req.query.category || 'general';
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -99,12 +118,12 @@ const getNews = async (req, res) => {
 // ── searchNews ─────────────────────────────────────────────────────────
 const searchNews = async (req, res) => {
   try {
-    const { 
-      q, 
+    const {
+      q,
       sortBy = 'publishedAt',
       from,
       to,
-      language = 'en'
+      language = 'en',
     } = req.query;
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -120,6 +139,7 @@ const searchNews = async (req, res) => {
 
     // If cache is fresh, serve it directly
     if (isCacheFresh(cached)) {
+      logger.debug('Search cache HIT (fresh):', cacheKey);
       return res.json(cached.data);
     }
 
@@ -133,32 +153,30 @@ const searchNews = async (req, res) => {
           from,
           to,
           language,
-          apiKey: process.env.NEWS_API_KEY
-        }
+          apiKey: process.env.NEWS_API_KEY,
+        },
       });
 
       const responseData = {
         articles: response.data.articles,
         totalResults: response.data.totalResults,
         page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        pageSize: parseInt(pageSize),
       };
 
       setCache(cacheKey, responseData);
-
       res.json(responseData);
     } catch (apiError) {
       if (cached) {
-        console.log('NewsAPI search error – serving stale cache for:', cacheKey);
+        logger.warn('NewsAPI search error — serving stale cache for:', cacheKey);
         return res.json(cached.data);
       }
-      // No cache – serve sample search results as fallback
-      console.log('NewsAPI search unavailable – serving sample search for:', q);
+      logger.warn('NewsAPI search unavailable — serving sample search for:', q);
       const sampleData = searchSampleArticles(q, page, pageSize);
       res.json(sampleData);
     }
   } catch (error) {
-    console.error('News search error:', error.response?.data || error.message);
+    logger.error('News search error:', error.message);
     const q = req.query.q || '';
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize) || 20));
@@ -175,9 +193,9 @@ const getCategories = (req, res) => {
     { id: 'business', name: 'Business' },
     { id: 'sports', name: 'Sports' },
     { id: 'health', name: 'Health' },
-    { id: 'entertainment', name: 'Entertainment' }
+    { id: 'entertainment', name: 'Entertainment' },
   ];
-  
+
   res.json({ categories });
 };
 
