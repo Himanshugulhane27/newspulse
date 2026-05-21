@@ -1,0 +1,209 @@
+# ============================================================================
+# NewsPulse — Backend CI Pipeline
+# ============================================================================
+# WHAT THIS FILE IS:
+#   A GitHub Actions workflow that runs automatically every time you push code
+#   or open a pull request. It installs your dependencies, runs your Jest
+#   integration tests (with an in-memory MongoDB), and verifies your Docker
+#   image builds correctly.
+#
+# WHERE IT LIVES:
+#   .github/workflows/ci.yml  (GitHub looks here automatically)
+#
+# HOW TO READ THIS FILE:
+#   YAML is indentation-sensitive (like Python). Every section below is
+#   annotated with comments explaining WHY it exists.
+# ============================================================================
+
+# ── 1. Workflow Name ────────────────────────────────────────────────────────
+# This is the human-readable label that appears in the GitHub "Actions" tab.
+name: NewsPulse CI
+
+# ── 2. Triggers ─────────────────────────────────────────────────────────────
+# WHEN should this pipeline run?
+#
+# • push    → every time you push commits to main or develop
+# • pull_request → every time a PR is opened/updated targeting main or develop
+#
+# WHY both?  Push catches issues on your main branches immediately.
+#            Pull request catches issues BEFORE code is merged.
+#
+# paths filter: We only care about backend changes. A frontend-only change
+# won't waste CI minutes re-running backend tests.
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/ci.yml'
+
+# ── 3. Jobs ─────────────────────────────────────────────────────────────────
+# A "job" is an independent unit of work that runs on a fresh virtual machine.
+# We define two jobs:
+#   • test   — install deps + run Jest
+#   • docker — verify the Docker image builds (only after tests pass)
+jobs:
+
+  # ╔══════════════════════════════════════════════════════════════════════╗
+  # ║  JOB 1: test                                                       ║
+  # ║  Purpose: Run the Jest integration test suite against an in-memory  ║
+  # ║           MongoDB (mongodb-memory-server — already in your project) ║
+  # ╚══════════════════════════════════════════════════════════════════════╝
+  test:
+    name: Run Tests (Node ${{ matrix.node-version }})
+
+    # WHAT machine to run on. ubuntu-latest is free for public repos and
+    # is the standard choice. macOS/Windows runners cost more minutes.
+    runs-on: ubuntu-latest
+
+    # ── Strategy Matrix ───────────────────────────────────────────────────
+    # WHY: Test on multiple Node versions to catch compatibility issues
+    #       early. 18 is your Dockerfile version, 20 is the current LTS.
+    #
+    # HOW: GitHub creates a SEPARATE runner for each version listed below.
+    #       If one fails, you know exactly which Node version broke.
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    # ── Environment Variables ─────────────────────────────────────────────
+    # These are injected into the runner's shell for ALL steps below.
+    #
+    # WHY each one:
+    #   NODE_ENV=test       → tells your app to use test-specific behavior
+    #                          (e.g., less verbose logging, different rate limits)
+    #   JWT_SECRET          → your tests set this in auth.test.js, but having
+    #                          it here ensures ANY test file can rely on it
+    #   MONGODB_URI         → not actually used because mongodb-memory-server
+    #                          creates its own URI, but set to a safe dummy
+    #                          so your app.js doesn't crash if it reads it
+    #   NEWS_API_KEY        → dummy value; tests shouldn't call real APIs
+    env:
+      NODE_ENV: test
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      MONGODB_URI: mongodb://localhost:27017/newspulse-ci-test
+      NEWS_API_KEY: test-api-key-not-real
+      CORS_ORIGIN: http://localhost:3000
+
+    # ── Steps ─────────────────────────────────────────────────────────────
+    # Steps run sequentially, top to bottom. If any step fails, ALL
+    # subsequent steps are SKIPPED and the job is marked as failed.
+    steps:
+
+      # STEP 1: Checkout your code
+      # WHY: The runner starts with an EMPTY filesystem. This action
+      #       clones your repo so the runner can actually see your code.
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # STEP 2: Set up the correct Node.js version
+      # WHY: The runner has a default Node version, but we want to
+      #       control exactly which version we test against.
+      #       actions/setup-node also configures npm caching automatically.
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      # STEP 3: Install dependencies
+      # WHY `npm ci` instead of `npm install`?
+      #   • npm ci uses the EXACT versions from package-lock.json
+      #   • npm install might resolve slightly different versions
+      #   • npm ci is faster because it skips the dependency resolution step
+      #   • npm ci deletes node_modules first, ensuring a clean slate
+      #
+      # This is the #1 CI best practice for Node.js projects.
+      - name: 📦 Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      # STEP 4: Run the Jest test suite
+      # WHY --forceExit: Supertest opens HTTP connections that sometimes
+      #       don't close cleanly. --forceExit ensures Jest exits even if
+      #       handles are still open.
+      # WHY --detectOpenHandles: prints a warning for any lingering async
+      #       operations (helps you find connection leaks during debugging).
+      # WHY --coverage: generates a test coverage report so you can see
+      #       which lines of code are actually tested.
+      - name: 🧪 Run Jest integration tests
+        working-directory: backend
+        run: npm test -- --verbose --coverage
+
+      # STEP 5: Upload coverage report as a build artifact
+      # WHY: Lets you download and inspect the coverage report from the
+      #       GitHub Actions UI. Useful for code reviews.
+      - name: 📊 Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-node-${{ matrix.node-version }}
+          path: backend/coverage/
+          retention-days: 14
+
+  # ╔══════════════════════════════════════════════════════════════════════╗
+  # ║  JOB 2: docker-build                                               ║
+  # ║  Purpose: Verify the Docker image builds successfully without      ║
+  # ║           actually pushing it anywhere.                            ║
+  # ╚══════════════════════════════════════════════════════════════════════╝
+  docker-build:
+    name: Verify Docker Build
+    runs-on: ubuntu-latest
+
+    # WHY `needs: test`?
+    # This creates a DEPENDENCY. The Docker build job will NOT start until
+    # the test job passes. No point building a Docker image if the tests fail.
+    needs: test
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # Build the Docker image but DON'T push it.
+      # WHY: This catches Dockerfile errors (missing files, bad COPY paths,
+      #       failed npm ci) before you try to deploy.
+      # The `-t` flag tags the image so it's easy to identify.
+      - name: 🐳 Build backend Docker image
+        run: docker build -t newspulse-backend:ci-${{ github.sha }} ./backend
+
+      # Verify the image actually starts and the health endpoint responds.
+      # WHY: A successful `docker build` doesn't mean the app actually RUNS.
+      #       This smoke test catches runtime errors (missing env vars, etc.)
+      - name: 🏥 Smoke test — verify container starts
+        run: |
+          # Start the container in the background with test env vars
+          docker run -d \
+            --name newspulse-ci-test \
+            -p 5000:5000 \
+            -e NODE_ENV=production \
+            -e PORT=5000 \
+            -e MONGODB_URI=mongodb://fake:27017/test \
+            -e JWT_SECRET=ci-smoke-test-secret \
+            -e NEWS_API_KEY=fake-key \
+            -e CORS_ORIGIN=http://localhost:3000 \
+            newspulse-backend:ci-${{ github.sha }}
+
+          # Give the server a few seconds to start
+          echo "Waiting for container to start..."
+          sleep 5
+
+          # Check if the container is still running (didn't crash immediately)
+          if docker ps | grep -q newspulse-ci-test; then
+            echo "✅ Container is running"
+          else
+            echo "❌ Container crashed on startup!"
+            docker logs newspulse-ci-test
+            exit 1
+          fi
+
+          # Clean up
+          docker stop newspulse-ci-test
+          docker rm newspulse-ci-test
